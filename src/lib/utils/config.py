@@ -25,14 +25,16 @@ class Config(object):
             os.makedirs(path)
         else:
             print(
-                f'\'{opt.exp_id}\' Directory already exists. Do you want to REPLACE it? Y/n')
+                f'\'{opt.exp_id}\' Directory already exists. Do you want to REPLACE it? y/n')
             inp = input()
-            if inp == "" or inp == "y" or inp == "Y":
+            if inp == "y" or inp == "Y":
                 shutil.rmtree(path)
                 os.makedirs(path)
-            else:
+            elif inp == "n" or inp == "N":
                 print("Enter the value of new exp_id.\n")
                 opt.exp_id = input()
+                self.diectory_check(opt)
+            else:
                 self.diectory_check(opt)
 
     def parse(self, args=''):
@@ -42,7 +44,11 @@ class Config(object):
             opt = self.parser.parse_args(args)
 
         opt.final_data_dir = os.path.join(opt.data_dir, "final_data")
+        opt.num_of_subjs = 5
+        opt.distance_measures = ["pearson", "kernel", "epanechnikov"]
+
         self.diectory_check(opt)
+
         return opt
 
     def init(self, args=''):
