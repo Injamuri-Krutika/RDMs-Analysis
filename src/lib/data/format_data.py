@@ -1,5 +1,6 @@
 import os
 from lib.utils.manage_pickle_files import load_obj
+import numpy as np
 
 
 class FormatData:
@@ -41,16 +42,19 @@ class FormatData:
 
             for subj in god_data.keys():
                 final_data[subj] = {}
-                final_data[subj]["roi_names"] = list(god_data["01"].keys())
-                final_data[subj]["stimulus_ids"] = god_data["01"]["FFA"]["labels"]
-                final_data[subj]["category_ids"] = [self.image_details[sti]
-                                                    ["category"] for sti in final_data[subj]["stimulus_ids"]]
-                final_data[subj]["image_names"] = [self.image_details[sti]
-                                                   ["image_name"] for sti in final_data[subj]["stimulus_ids"]]
-                final_data[subj]["category_names"] = [self.image_details[sti]
-                                                      ["category_name"] for sti in final_data[subj]["stimulus_ids"]]
+                final_data[subj]["roi_names"] = list(god_data["1"].keys())
+                final_data[subj]["stimulus_ids"] = np.array(
+                    god_data["1"]["FFA"]["labels"]).astype(str)
+                final_data[subj]["category_ids"] = np.array([self.image_details[sti[0]]
+                                                             ["category"] for sti in final_data[subj]["stimulus_ids"]])
+                final_data[subj]["image_names"] = np.array([self.image_details[sti[0]]
+                                                            ["image_name"] for sti in final_data[subj]["stimulus_ids"]])
+                final_data[subj]["category_names"] = np.array([self.image_details[sti[0]]
+                                                               ["category_name"] for sti in final_data[subj]["stimulus_ids"]])
 
                 for roi in god_data[subj].keys():
+                    if "roi_data" not in final_data[subj].keys():
+                        final_data[subj]["roi_data"] = {}
                     final_data[subj]["roi_data"][roi] = god_data[subj][roi]["brain_data"]
 
         elif self.data_type == "GOD":
@@ -64,8 +68,27 @@ class FormatData:
                 final_data[subj]["stimulus_ids"] = data["stimulus_id"]
                 final_data[subj]["category_ids"] = data["category"]
                 final_data[subj]["image_names"] = data["image_name"]
-                final_data[subj]["category_names"] = [self.image_details[sti]
-                                                      ["category_name"] for sti in final_data[subj]["stimulus_ids"]]
+                final_data[subj]["category_names"] = np.array([self.image_details[sti]
+                                                               ["category_name"] for sti in final_data[subj]["stimulus_ids"]])
                 final_data[subj]["roi_data"] = data["roi_data"]
 
+            if self.config.subset_data:
+                self.get_required_labels(final_data)
+
         return final_data
+
+    def get_required_labels(self,  data, label_type="category_ids"):
+        for subj in data.keys():
+            y = np.where(
+                data[subj][label_type] == self.config.category_ids.reshape(-1, 1))
+            ind = y[1]
+            data[subj]["stimulus_ids"] = data[subj]["stimulus_ids"][ind]
+            data[subj]["category_ids"] = data[subj]["category_ids"][ind]
+            data[subj]["image_names"] = data[subj]["image_names"][ind]
+            data[subj]["category_names"] = data[subj]["category_names"][ind]
+            if self.data_type == "PRE-GOD":
+                data[subj]["roi_data"] = data["roi_data"][ind]
+            elif self.data_type == "GOD":
+                for roi in data[subj]["roi_data"].keys():
+                    for stat in data[subj]["roi_data"][roi]:
+                        data[subj]["roi_data"][roi][stat] = data[subj]["roi_data"][roi][stat][ind]

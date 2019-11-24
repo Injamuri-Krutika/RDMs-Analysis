@@ -1,6 +1,7 @@
 import argparse
 import os
 import shutil
+import numpy as np
 
 
 class Config(object):
@@ -16,11 +17,18 @@ class Config(object):
 
         self.parser.add_argument('--data_dir', default='/home/krutika/Data/ds001246-download/',
                                  help='GOD Dataset Directory')
+        self.parser.add_argument('--result_dir', default='../results',
+                                 help='GOD Dataset Directory')
 
         self.parser.add_argument('--exp_id', default='default')
+        self.parser.add_argument('--subset_data', action="store_true",
+                                 help="Analyse the RDMs only for a specified subset of data. Subset is defined by --category_ids argument.")
+        self.parser.add_argument('--category_ids', default=None, type=str,
+                                 help="Must be comma seperated. Values can be between 1 to 150"
+                                 )
 
     def diectory_check(self, opt):
-        path = os.path.join("../results", opt.exp_id)
+        path = os.path.join(opt.result_dir, opt.exp_id)
         if not os.path.exists(path):
             os.makedirs(path)
         else:
@@ -45,7 +53,8 @@ class Config(object):
 
         opt.final_data_dir = os.path.join(opt.data_dir, "final_data")
         opt.num_of_subjs = 5
-        opt.distance_measures = ["pearson", "kernel", "epanechnikov"]
+        opt.distance_measures = ["pearson", "kernel"]
+        opt.category_ids = np.array(opt.category_ids.split(","))
 
         self.diectory_check(opt)
 
