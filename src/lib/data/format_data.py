@@ -31,7 +31,7 @@ class FormatData:
                         "image_name": row[0],
                         "category": row[2],
                         "num": row[3],
-                        "category_name": category_map[row[0].split("_")[0]]}
+                        "category_name": category_map[row[0].split("_")[0]].split(",")[0]}
 
     def format(self):
         final_data = {}
@@ -72,8 +72,8 @@ class FormatData:
                                                                ["category_name"] for sti in final_data[subj]["stimulus_ids"]])
                 final_data[subj]["roi_data"] = data["roi_data"]
 
-            if self.config.subset_data:
-                self.get_required_labels(final_data)
+        if self.config.subset_data:
+            self.get_required_labels(final_data)
 
         return final_data
 
@@ -87,7 +87,8 @@ class FormatData:
             data[subj]["image_names"] = data[subj]["image_names"][ind]
             data[subj]["category_names"] = data[subj]["category_names"][ind]
             if self.data_type == "PRE-GOD":
-                data[subj]["roi_data"] = data["roi_data"][ind]
+                for roi in data[subj]["roi_data"].keys():
+                    data[subj]["roi_data"][roi] = data[subj]["roi_data"][roi][ind]
             elif self.data_type == "GOD":
                 for roi in data[subj]["roi_data"].keys():
                     for stat in data[subj]["roi_data"][roi]:
