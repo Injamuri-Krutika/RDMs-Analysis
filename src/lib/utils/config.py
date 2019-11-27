@@ -26,6 +26,13 @@ class Config(object):
         self.parser.add_argument('--category_ids', default=None, type=str,
                                  help="Must be comma seperated. Values can be between 1 to 150"
                                  )
+        self.parser.add_argument('--ep', action="store_true",
+                                 help="It will consider epanechnicov instead of gaussian kernel."
+                                 )
+
+        self.parser.add_argument('--corr', action="store_true",
+                                 help="It will calculate the correlation of RDMS between subjects for all 1200 images."
+                                 )
 
     def diectory_check(self, opt):
         path = os.path.join(opt.result_dir, opt.exp_id)
@@ -53,7 +60,10 @@ class Config(object):
 
         opt.final_data_dir = os.path.join(opt.data_dir, "final_data")
         opt.num_of_subjs = 5
-        opt.distance_measures = ["pearson", "kernel"]
+        if opt.ep:
+            opt.distance_measures = ["pearson", "epanechnicov"]
+        else:
+            opt.distance_measures = ["pearson", "kernel"]
         opt.category_ids = np.array(opt.category_ids.split(","))
 
         self.diectory_check(opt)

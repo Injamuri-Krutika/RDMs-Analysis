@@ -2,7 +2,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os
 import numpy as np
+from lib.utils.corr import get_corr
 from scipy.stats import spearmanr
+from scipy.spatial.distance import squareform
 
 
 def plot_rdm_group(rdms, roi, distance_measures, path, labels):
@@ -31,8 +33,9 @@ def plot_rdm_group(rdms, roi, distance_measures, path, labels):
     divider = make_axes_locatable(ax2)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     fig.colorbar(im2, cax=cax, orientation='vertical')
-    # print(spearmanr(
-    #     rdms[distance_measures[0]], rdms[distance_measures[1]])[0])
+    corr = get_corr(rdms[distance_measures[0]], rdms[distance_measures[1]])
 
-    # plt.title("Correlation between two RDMs: ")
+    plt.title(
+        f'Correlation between two RDMs: {corr}', x=-25, y=-0.2, fontsize=20)
     plt.savefig(os.path.join(path, roi+".png"))
+    plt.close()
