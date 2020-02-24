@@ -46,10 +46,10 @@ class GenerateRDMs:
                             rdm[distance_measure][ind_tuples[cat_num1][0]:ind_tuples[cat_num1][1],
                                                   ind_tuples[cat_num2][0]:ind_tuples[cat_num2][1]])
                     new_labels = new_labels + [labels[ind_tuples[cat_num1][0]]]
-            # if not os.path.exists(new_path):
-            #     os.makedirs(new_path)
-            # plot_rdm_group(
-            #     new_rdm, roi, self.config.distance_measures, new_path, new_labels)
+            if not os.path.exists(new_path):
+                os.makedirs(new_path)
+            plot_rdm_group(
+                new_rdm, roi, self.config.distance_measures, new_path, new_labels)
 
             num_of_cat = len(super_categories.keys())
             ind_tuples = get_sup_cat_ind_tuples()
