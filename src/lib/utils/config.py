@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 import numpy as np
+from lib.utils.new_categories import get_new_category_list
 
 
 class Config(object):
@@ -15,7 +16,7 @@ class Config(object):
         self.parser.add_argument(
             '--sigma_ep', type=float, default=1.0, help='Bandwidth for Epanechnikov Kernel')
 
-        self.parser.add_argument('--data_dir', default='/home/krutika/Data/ds001246-download/',
+        self.parser.add_argument('--data_dir', default='../data/',
                                  help='GOD Dataset Directory')
         self.parser.add_argument('--result_dir', default='../results',
                                  help='GOD Dataset Directory')
@@ -32,6 +33,10 @@ class Config(object):
 
         self.parser.add_argument('--corr', action="store_true",
                                  help="It will calculate the correlation of RDMS between subjects for all 1200 images."
+                                 )
+
+        self.parser.add_argument('--categorise', action="store_true",
+                                 help="It will create RDMs and analyse only for 2, 3, 12, 13, 22, 23, 30, 31, 143, 145, 146, 148, 149, 47, 140, 70, 40, 78, 79, 84, 85, 122, 65, 112, 58, 87, 113, 127 categories"
                                  )
 
     def diectory_check(self, opt):
@@ -64,7 +69,12 @@ class Config(object):
             opt.distance_measures = ["pearson", "epanechnicov"]
         else:
             opt.distance_measures = ["pearson", "kernel"]
-        opt.category_ids = np.array(opt.category_ids.split(","))
+
+        if opt.categorise:
+            opt.category_ids = get_new_category_list()
+            opt.subset_data = True
+        elif opt.category_ids:
+            opt.category_ids = np.array(opt.category_ids.split(","))
 
         self.diectory_check(opt)
 

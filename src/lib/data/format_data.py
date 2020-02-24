@@ -79,8 +79,12 @@ class FormatData:
 
     def get_required_labels(self,  data, label_type="category_ids"):
         for subj in data.keys():
-            y = np.where(
-                data[subj][label_type] == self.config.category_ids.reshape(-1, 1))
+            if type(self.config.category_ids) is list:
+                y = np.where(data[subj][label_type] ==
+                             np.array(list(map(str, self.config.category_ids))).reshape(-1, 1))
+            else:
+                y = np.where(
+                    data[subj][label_type] == self.config.category_ids.reshape(-1, 1))
             ind = y[1]
             data[subj]["stimulus_ids"] = data[subj]["stimulus_ids"][ind]
             data[subj]["category_ids"] = data[subj]["category_ids"][ind]

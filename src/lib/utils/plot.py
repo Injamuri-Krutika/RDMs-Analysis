@@ -34,7 +34,6 @@ def plot_rdm_group(rdms, roi, distance_measures, path, labels):
     cax = divider.append_axes('right', size='5%', pad=0.05)
     fig.colorbar(im2, cax=cax, orientation='vertical')
     corr = get_corr(rdms[distance_measures[0]], rdms[distance_measures[1]])
-
     plt.title(
         f'Correlation between two RDMs: {corr}', x=-25, y=-0.2, fontsize=20)
     plt.savefig(os.path.join(path, roi+".png"))
