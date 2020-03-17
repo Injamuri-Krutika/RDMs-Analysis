@@ -12,6 +12,47 @@ class GenerateRDMs:
     def __init__(self, config):
         self.config = config
 
+    def categorise_rdms(self, rdm, labels):
+
+        if self.config.categorise:
+            ind_tuples = get_ind_tuples()
+            num_of_cat = len(ind_tuples)
+            new_rdm = {
+                self.config.distance_measures[0]: np.zeros(
+                    (num_of_cat, num_of_cat)),
+                self.config.distance_measures[1]: np.zeros(
+                    (num_of_cat, num_of_cat))
+            }
+
+            for distance_measure in self.config.distance_measures:
+                new_labels = []
+                for cat_num1 in range(num_of_cat):
+                    for cat_num2 in range(num_of_cat):
+                        new_rdm[distance_measure][cat_num1, cat_num2] = np.mean(
+                            rdm[distance_measure][ind_tuples[cat_num1][0]:ind_tuples[cat_num1][1],
+                                                  ind_tuples[cat_num2][0]:ind_tuples[cat_num2][1]])
+                    new_labels = new_labels + [labels[ind_tuples[cat_num1][0]]]
+            return new_rdm, new_labels
+
+    def super_categorise_rdms(self, rdm):
+
+        num_of_cat = len(super_categories.keys())
+        ind_tuples = get_sup_cat_ind_tuples()
+        sup_cat_rdm = {
+            self.config.distance_measures[0]: np.zeros(
+                (num_of_cat, num_of_cat)),
+            self.config.distance_measures[1]: np.zeros(
+                (num_of_cat, num_of_cat))
+        }
+        for distance_measure in self.config.distance_measures:
+            for cat_num1 in range(num_of_cat):
+                for cat_num2 in range(num_of_cat):
+                    sup_cat_rdm[distance_measure][cat_num1, cat_num2] = np.mean(
+                        rdm[distance_measure][ind_tuples[cat_num1][0]:ind_tuples[cat_num1][1],
+                                              ind_tuples[cat_num2][0]:ind_tuples[cat_num2][1]])
+
+        return sup_cat_rdm
+
     def rdm(self, data, roi=None, path=None, labels=None):
         rdm = {}
         for distance_measure in self.config.distance_measures:
@@ -24,52 +65,27 @@ class GenerateRDMs:
             elif distance_measure == "epanechnicov":
                 rdm["epanechnicov"] = 1 - epanechnikov_similarity(data)
 
-            io.savemat(os.path.join(path, distance_measure+".mat"), rdm)
+        io.savemat(os.path.join(path, roi+".mat"), rdm)
 
-        if self.config.categorise:
-            ind_tuples = get_ind_tuples()
-            num_of_cat = len(ind_tuples)
-            new_rdm = {
-                self.config.distance_measures[0]: np.zeros(
-                    (num_of_cat, num_of_cat)),
-                self.config.distance_measures[1]: np.zeros(
-                    (num_of_cat, num_of_cat))
-            }
+        new_rdm, new_labels = self.categorise_rdms(rdm, labels)
+        new_path = os.path.join(path, "categorised")
+        if not os.path.exists(new_path):
+            os.makedirs(new_path)
 
-            new_path = os.path.join(path, "categorised")
+        io.savemat(os.path.join(
+            path, "categorised", roi+".mat"), new_rdm)
+        plot_rdm_group(
+            new_rdm, roi, self.config.distance_measures, new_path, new_labels)
 
-            for distance_measure in self.config.distance_measures:
-                new_labels = []
-                for cat_num1 in range(num_of_cat):
-                    for cat_num2 in range(num_of_cat):
-                        new_rdm[distance_measure][cat_num1, cat_num2] = np.mean(
-                            rdm[distance_measure][ind_tuples[cat_num1][0]:ind_tuples[cat_num1][1],
-                                                  ind_tuples[cat_num2][0]:ind_tuples[cat_num2][1]])
-                    new_labels = new_labels + [labels[ind_tuples[cat_num1][0]]]
-            if not os.path.exists(new_path):
-                os.makedirs(new_path)
-            plot_rdm_group(
-                new_rdm, roi, self.config.distance_measures, new_path, new_labels)
+        sup_cat_rdm = self.super_categorise_rdms(rdm)
 
-            num_of_cat = len(super_categories.keys())
-            ind_tuples = get_sup_cat_ind_tuples()
-            new_path = os.path.join(path, "super_categorised")
-            sup_cat_rdm = {
-                self.config.distance_measures[0]: np.zeros(
-                    (num_of_cat, num_of_cat)),
-                self.config.distance_measures[1]: np.zeros(
-                    (num_of_cat, num_of_cat))
-            }
-            for distance_measure in self.config.distance_measures:
-                for cat_num1 in range(num_of_cat):
-                    for cat_num2 in range(num_of_cat):
-                        sup_cat_rdm[distance_measure][cat_num1, cat_num2] = np.mean(
-                            new_rdm[distance_measure][ind_tuples[cat_num1][0]:ind_tuples[cat_num1][1],
-                                                      ind_tuples[cat_num2][0]:ind_tuples[cat_num2][1]])
-            if not os.path.exists(new_path):
-                os.makedirs(new_path)
-            plot_rdm_group(
-                sup_cat_rdm, roi, self.config.distance_measures, new_path, list(super_categories.keys()))
+        new_path = os.path.join(path, "super_categorised")
+        if not os.path.exists(new_path):
+            os.makedirs(new_path)
+        io.savemat(os.path.join(
+            path, "super_categorised", roi+".mat"), sup_cat_rdm)
+        plot_rdm_group(
+            sup_cat_rdm, roi, self.config.distance_measures, new_path, list(super_categories.keys()))
 
         if path != None and len(labels) != 0:
             plot_rdm_group(

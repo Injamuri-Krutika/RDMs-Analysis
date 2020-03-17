@@ -11,4 +11,7 @@ this_dir = osp.dirname(__file__)
 
 # Add lib to PYTHONPATH
 lib_path = osp.join(this_dir, 'lib')
+algonauts_path = osp.join(this_dir, 'algonauts')
+
 add_path(lib_path)
+add_path(algonauts_path)

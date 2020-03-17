@@ -8,7 +8,7 @@ clubed_categories = {
     "hummingbird, goose": [12, 13],  # Animals
     "dogs, greyhound": [22, 23],  # Animals
     "horse, zebra": [30, 31],  # Animals
-    "tomato, watermelon, grapes": [143, 145, 146],  # Food
+    # "tomato, watermelon, grapes": [143, 145, 146],  # Food
     "palm, trees": [148, 149],  # Trees/Greenery
     "lighthouse, windmill, gas pump": [47, 140, 70],  # Places for PPA
     "airship, helicopter, hot-air balloon": [40, 78, 79],  # Air vehicles
@@ -20,7 +20,7 @@ clubed_categories = {
 
 super_categories = {
     "animals": [2, 3, 12, 13, 22, 23, 30, 31],
-    "fruits": [143, 145, 146],
+    # "fruits": [143, 145, 146],
     "trees": [148, 149],
     "places": [47, 140, 70],
     "vehicles": [40, 78, 79, 84, 85, 122, 65, 112],
