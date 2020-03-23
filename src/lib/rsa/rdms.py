@@ -8,14 +8,38 @@ import os
 from lib.utils.new_categories import get_ind_tuples, super_categories, get_sup_cat_ind_tuples
 
 
+def get_box_plot_cat_tupleind(labels):
+    start, end = 0, -1
+    prev_cat = ""
+    cats = labels
+    cat_ind = -1
+    start_end_ind = []
+    for i, cat in enumerate(cats):
+        if prev_cat != cat:
+            if cat_ind != -1:
+                start_end_ind = start_end_ind + \
+                    [(start, i)]
+                start = i
+            cat_ind += 1
+        prev_cat = cat
+    start_end_ind = start_end_ind + \
+        [(start, len(labels))]
+    return start_end_ind
+
+
+def get_box_plot_supcat_tupleind():
+    return [(0, 9), (9, 32)]
+
+
 class GenerateRDMs:
     def __init__(self, config):
         self.config = config
 
     def categorise_rdms(self, rdm, labels):
 
-        if self.config.categorise:
-            ind_tuples = get_ind_tuples()
+        if self.config.categorise or self.config.box_plot:
+            ind_tuples = get_box_plot_cat_tupleind(
+                labels) if self.config.box_plot else get_ind_tuples()
             num_of_cat = len(ind_tuples)
             new_rdm = {
                 self.config.distance_measures[0]: np.zeros(
@@ -36,8 +60,10 @@ class GenerateRDMs:
 
     def super_categorise_rdms(self, rdm):
 
-        num_of_cat = len(super_categories.keys())
-        ind_tuples = get_sup_cat_ind_tuples()
+        num_of_cat = 2 if self.config.box_plot else len(
+            super_categories.keys())
+        ind_tuples = get_box_plot_supcat_tupleind(
+        ) if self.config.box_plot else get_sup_cat_ind_tuples()
         sup_cat_rdm = {
             self.config.distance_measures[0]: np.zeros(
                 (num_of_cat, num_of_cat)),
@@ -67,28 +93,30 @@ class GenerateRDMs:
 
         io.savemat(os.path.join(path, roi+".mat"), rdm)
 
-        new_rdm, new_labels = self.categorise_rdms(rdm, labels)
-        new_path = os.path.join(path, "categorised")
-        if not os.path.exists(new_path):
-            os.makedirs(new_path)
+        if self.config.categorise or self.config.box_plot:
+            new_rdm, new_labels = self.categorise_rdms(rdm, labels)
+            new_path = os.path.join(path, "categorised")
+            if not os.path.exists(new_path):
+                os.makedirs(new_path)
 
-        io.savemat(os.path.join(
-            path, "categorised", roi+".mat"), new_rdm)
-        plot_rdm_group(
-            new_rdm, roi, self.config.distance_measures, new_path, new_labels)
+            io.savemat(os.path.join(
+                path, "categorised", roi+".mat"), new_rdm)
+            plot_rdm_group(
+                new_rdm, roi, self.config.distance_measures, new_path, new_labels)
 
-        sup_cat_rdm = self.super_categorise_rdms(rdm)
+            sup_cat_rdm = self.super_categorise_rdms(rdm)
 
-        new_path = os.path.join(path, "super_categorised")
-        if not os.path.exists(new_path):
-            os.makedirs(new_path)
-        io.savemat(os.path.join(
-            path, "super_categorised", roi+".mat"), sup_cat_rdm)
-        plot_rdm_group(
-            sup_cat_rdm, roi, self.config.distance_measures, new_path, list(super_categories.keys()))
+            new_path = os.path.join(path, "super_categorised")
+            if not os.path.exists(new_path):
+                os.makedirs(new_path)
+            io.savemat(os.path.join(
+                path, "super_categorised", roi+".mat"), sup_cat_rdm)
+            labels = ["places", "faces"] if self.config.box_plot else list(
+                super_categories.keys())
+            plot_rdm_group(
+                sup_cat_rdm, roi, self.config.distance_measures, new_path, labels)
 
         if path != None and len(labels) != 0:
             plot_rdm_group(
                 rdm, roi, self.config.distance_measures, path, labels)
-        else:
-            return rdm
+        return rdm

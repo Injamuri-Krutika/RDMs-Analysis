@@ -25,6 +25,14 @@ class Config(object):
         self.parser.add_argument('--exp_id', default='default')
         self.parser.add_argument('--subset_data', action="store_true",
                                  help="Analyse the RDMs only for a specified subset of data. Subset is defined by --category_ids argument.")
+
+        self.parser.add_argument('--box_plot', action="store_true",
+                                 help="Draw box plot for specfic data set.")
+        self.parser.add_argument('--hierarchical_clustering', action="store_true",
+                                 help="Creates Dendogram for different brain regions for all the 150 categories. Does Hierarchical clustering.")
+        self.parser.add_argument('--animate_inanimate', action="store_true",
+                                 help="Performs RDM Analysis, Box Plotting for Plans, animals and inanimate objects.")
+
         self.parser.add_argument('--category_ids', default=None, type=str,
                                  help="Must be comma seperated. Values can be between 1 to 150"
                                  )
@@ -53,19 +61,19 @@ class Config(object):
             path = os.path.join(opt.result_dir, opt.exp_id)
         if not os.path.exists(path):
             os.makedirs(path)
-        # else:
-        #     print(
-        #         f'\'{opt.exp_id}\' Directory already exists. Do you want to REPLACE it? y/n')
-        #     inp = input()
-        #     if inp == "y" or inp == "Y":
-        #         shutil.rmtree(path)
-        #         os.makedirs(path)
-        #     elif inp == "n" or inp == "N":
-        #         print("Enter the value of new exp_id.\n")
-        #         opt.exp_id = input()
-        #         self.diectory_check(opt)
-        #     else:
-        #         self.diectory_check(opt)
+        else:
+            print(
+                f'\'{opt.exp_id}\' Directory already exists. Do you want to REPLACE it? y/n')
+            inp = input()
+            if inp == "y" or inp == "Y":
+                shutil.rmtree(path)
+                os.makedirs(path)
+            elif inp == "n" or inp == "N":
+                print("Enter the value of new exp_id.\n")
+                opt.exp_id = input()
+                self.diectory_check(opt)
+            else:
+                self.diectory_check(opt)
 
     def parse(self, args=''):
         if args == '':

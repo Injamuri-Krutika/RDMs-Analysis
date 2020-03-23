@@ -1,6 +1,7 @@
 import os
 from lib.utils.manage_pickle_files import load_obj
 import numpy as np
+from lib.utils.new_categories import place_categoryids, face_imagenames, homonoid_monkey_imagenames
 
 
 class FormatData:
@@ -72,20 +73,30 @@ class FormatData:
                                                                ["category_name"] for sti in final_data[subj]["stimulus_ids"]])
                 final_data[subj]["roi_data"] = data["roi_data"]
 
-        if self.config.subset_data:
+        if self.config.subset_data or self.config.box_plot:
             self.get_required_labels(final_data)
 
         return final_data
 
     def get_required_labels(self,  data, label_type="category_ids"):
+        last_ind = 0
         for subj in data.keys():
-            if type(self.config.category_ids) is list:
+            if self.config.box_plot:
+                ind1 = np.where(data[subj][label_type] == np.array(
+                    place_categoryids).reshape(-1, 1))[1]
+                ind2 = np.where(data[subj]["image_names"] == np.array(
+                    face_imagenames+homonoid_monkey_imagenames).reshape(-1, 1))[1]
+                ind = np.append(ind1, ind2)
+                last_ind = ind1.shape[0]
+            elif type(self.config.category_ids) is list:
                 y = np.where(data[subj][label_type] ==
                              np.array(list(map(str, self.config.category_ids))).reshape(-1, 1))
+                ind = y[1]
             else:
                 y = np.where(
                     data[subj][label_type] == self.config.category_ids.reshape(-1, 1))
-            ind = y[1]
+                ind = y[1]
+
             data[subj]["stimulus_ids"] = data[subj]["stimulus_ids"][ind]
             data[subj]["category_ids"] = data[subj]["category_ids"][ind]
             data[subj]["image_names"] = data[subj]["image_names"][ind]
@@ -97,3 +108,6 @@ class FormatData:
                 for roi in data[subj]["roi_data"].keys():
                     for stat in data[subj]["roi_data"][roi]:
                         data[subj]["roi_data"][roi][stat] = data[subj]["roi_data"][roi][stat][ind]
+
+        if self.config.box_plot:
+            data["place_lastind"] = last_ind

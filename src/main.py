@@ -7,7 +7,9 @@ from lib.utils.corr import get_corr
 from lib.utils.new_categories import get_new_category_list, get_new_cat_image_names, super_categories, clubed_categories, super_categories
 from algonauts.src.lib.feature_extract.generate_features import GenerateFeatures
 from algonauts.src.lib.feature_extract.create_RDMs import CreateRDMs
-
+from lib.analysis_for_boxplot import BoxPlotting
+from lib.hierarchical_clustering import HierarchicalClustering
+from lib.animate_inanimate import AnimateInanimate
 from tqdm import tqdm
 import numpy as np
 import sys
@@ -22,6 +24,8 @@ sys.setrecursionlimit(15000)
 def analyse_RDMs(config):
     for data_type in tqdm(["GOD", "PRE-GOD"]):
         data = FormatData(config, data_type=data_type).format()
+        print(data[list(data.keys())[0]]["image_names"])
+
         base_path = os.path.join(config.result_dir, config.exp_id, data_type)
         for subj in tqdm(data.keys()):
             for roi in data[subj]["roi_names"]:
@@ -256,61 +260,61 @@ def avg_human_rdms(config):
         plot_rdm_group(
             avg_sup_cat_rdms, roi, config.distance_measures, sup_cat_avg_path, list(super_categories.keys()))
 
-    data_type = "GOD"
-    data = FormatData(config, data_type=data_type,
-                      ).format()
-    subj = list(data.keys())[0]
-    for roi in data[subj]["roi_names"]:
-        for stat in data[subj]["roi_data"][roi].keys():
-            for subj in data.keys():
-                path = os.path.join(config.result_dir, "categorised",
-                                    config.exp_id, data_type, str(subj), stat)
-                avg_path = os.path.join(config.result_dir, "categorised",
-                                        config.exp_id, data_type, "avg")
-                actual_avg_path = os.path.join(avg_path, stat)
-                if not os.path.exists(actual_avg_path):
-                    os.makedirs(actual_avg_path)
-                cat_avg_path = os.path.join(avg_path, "categorised", stat)
-                if not os.path.exists(cat_avg_path):
-                    os.makedirs(cat_avg_path)
+    # data_type = "GOD"
+    # data = FormatData(config, data_type=data_type,
+    #                   ).format()
+    # subj = list(data.keys())[0]
+    # for roi in data[subj]["roi_names"]:
+    #     for stat in data[subj]["roi_data"][roi].keys():
+    #         for subj in data.keys():
+    #             path = os.path.join(config.result_dir, "categorised",
+    #                                 config.exp_id, data_type, str(subj), stat)
+    #             avg_path = os.path.join(config.result_dir, "categorised",
+    #                                     config.exp_id, data_type, "avg")
+    #             actual_avg_path = os.path.join(avg_path, stat)
+    #             if not os.path.exists(actual_avg_path):
+    #                 os.makedirs(actual_avg_path)
+    #             cat_avg_path = os.path.join(avg_path, "categorised", stat)
+    #             if not os.path.exists(cat_avg_path):
+    #                 os.makedirs(cat_avg_path)
 
-                sup_cat_avg_path = os.path.join(
-                    avg_path, "super_categorised", stat)
-                if not os.path.exists(sup_cat_avg_path):
-                    os.makedirs(sup_cat_avg_path)
+    #             sup_cat_avg_path = os.path.join(
+    #                 avg_path, "super_categorised", stat)
+    #             if not os.path.exists(sup_cat_avg_path):
+    #                 os.makedirs(sup_cat_avg_path)
 
-                cat_path = os.path.join(path, "categorised")
-                sup_cat_path = os.path.join(path, "super_categorised")
+    #             cat_path = os.path.join(path, "categorised")
+    #             sup_cat_path = os.path.join(path, "super_categorised")
 
-                for distance_measure in config.distance_measures:
-                    rdms = io.loadmat(path+"/"+roi+".mat")
-                    actual_rdms[distance_measure][int(subj) -
-                                                  1] = rdms[distance_measure]
-                    rdms = io.loadmat(cat_path+"/"+roi+".mat")
-                    cat_rdms[distance_measure][int(
-                        subj)-1] = rdms[distance_measure]
-                    rdms = io.loadmat(sup_cat_path+"/"+roi+".mat")
-                    sup_cat_rdms[distance_measure][int(subj) -
-                                                   1] = rdms[distance_measure]
+    #             for distance_measure in config.distance_measures:
+    #                 rdms = io.loadmat(path+"/"+roi+".mat")
+    #                 actual_rdms[distance_measure][int(subj) -
+    #                                               1] = rdms[distance_measure]
+    #                 rdms = io.loadmat(cat_path+"/"+roi+".mat")
+    #                 cat_rdms[distance_measure][int(
+    #                     subj)-1] = rdms[distance_measure]
+    #                 rdms = io.loadmat(sup_cat_path+"/"+roi+".mat")
+    #                 sup_cat_rdms[distance_measure][int(subj) -
+    #                                                1] = rdms[distance_measure]
 
-            for distance_measure in config.distance_measures:
-                avg_actual_rdms[distance_measure] = np.mean(
-                    actual_rdms[distance_measure], axis=0)
-                avg_cat_rdms[distance_measure] = np.mean(
-                    cat_rdms[distance_measure], axis=0)
-                avg_sup_cat_rdms[distance_measure] = np.mean(
-                    sup_cat_rdms[distance_measure], axis=0)
-            io.savemat(os.path.join(actual_avg_path,
-                                    roi+".mat"), avg_actual_rdms)
-            io.savemat(os.path.join(cat_avg_path, roi+".mat"), avg_cat_rdms)
-            io.savemat(os.path.join(sup_cat_avg_path,
-                                    roi+".mat"), avg_sup_cat_rdms)
-            plot_rdm_group(
-                avg_actual_rdms, roi, config.distance_measures, actual_avg_path, labels)
-            plot_rdm_group(
-                avg_cat_rdms, roi, config.distance_measures, cat_avg_path,  clubed_labels)
-            plot_rdm_group(
-                avg_sup_cat_rdms, roi, config.distance_measures, sup_cat_avg_path,  list(super_categories.keys()))
+    #         for distance_measure in config.distance_measures:
+    #             avg_actual_rdms[distance_measure] = np.mean(
+    #                 actual_rdms[distance_measure], axis=0)
+    #             avg_cat_rdms[distance_measure] = np.mean(
+    #                 cat_rdms[distance_measure], axis=0)
+    #             avg_sup_cat_rdms[distance_measure] = np.mean(
+    #                 sup_cat_rdms[distance_measure], axis=0)
+    #         io.savemat(os.path.join(actual_avg_path,
+    #                                 roi+".mat"), avg_actual_rdms)
+    #         io.savemat(os.path.join(cat_avg_path, roi+".mat"), avg_cat_rdms)
+    #         io.savemat(os.path.join(sup_cat_avg_path,
+    #                                 roi+".mat"), avg_sup_cat_rdms)
+    #         plot_rdm_group(
+    #             avg_actual_rdms, roi, config.distance_measures, actual_avg_path, labels)
+    #         plot_rdm_group(
+    #             avg_cat_rdms, roi, config.distance_measures, cat_avg_path,  clubed_labels)
+    #         plot_rdm_group(
+    #             avg_sup_cat_rdms, roi, config.distance_measures, sup_cat_avg_path,  list(super_categories.keys()))
 
 
 def write_to_excel(arch, data, coloumns, sheetname):
@@ -432,13 +436,23 @@ def compare(config):
 def main(config):
     if config.corr:
         find_corr(config)
-    elif config.categorise:
-        # analyse_categorised_RDMs(config)
+
+    if config.categorise:
+        analyse_categorised_RDMs(config)
         avg_human_rdms(config)
-        # GenerateFeatures(config).run()
-        # CreateRDMs(config).run()
-        # organise(config)
-        # compare(config)
+    if config.models:
+        GenerateFeatures(config).run()
+        CreateRDMs(config).run()
+        organise(config)
+        compare(config)
+
+    if config.box_plot:
+        BoxPlotting().run(config)
+    if config.hierarchical_clustering:
+        HierarchicalClustering(config).run()
+    if config.animate_inanimate:
+        AnimateInanimate(config).run()
+
     else:
         analyse_RDMs(config)
 
