@@ -19,14 +19,17 @@ class AnimateInanimate():
         axs[0].boxplot(data["plants"])
         axs[0].set_title('Plants Related Images')
         axs[0].set_xticklabels(x_labels)
+        axs[0].set_ylim(bottom=-0.3, top=0.3)
 
         axs[1].boxplot(data["animals"])
         axs[1].set_title('Animals Related Images')
         axs[1].set_xticklabels(x_labels)
+        axs[1].set_ylim(bottom=-0.3, top=0.3)
 
         axs[2].boxplot(data["inanimate"])
         axs[2].set_title('Inanimate Related Images')
         axs[2].set_xticklabels(x_labels)
+        axs[2].set_ylim(bottom=-0.3, top=0.3)
 
         plt.savefig(path)
         plt.close()
@@ -138,5 +141,4 @@ class AnimateInanimate():
                             data[subj]["category_names"], roi, os.path.join(cat_path, "AVG"))
             self.categorise(avg_rdm,
                             data[subj]["category_names"], roi, os.path.join(sup_cat_path, "AVG"), super_categorise=True)
-        print(boxplot_data)
         self.plot_boxplot(boxplot_data, boxplot_path, roi_names)

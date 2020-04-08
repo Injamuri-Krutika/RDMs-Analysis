@@ -104,6 +104,11 @@ def get_new_cat_image_names():  # Returns image names of the new categories unde
 # Place and Face images
 
 place_categoryids = ["1", "32", "47", "99", "106", "118", "129", "132", "140"]
+
+# Object Categories
+object_categoryids = ["50", "54", "56", "58", "58", "61", "69", "72", "103"]
+
+
 # All Imagenames of 35, 36, 37 categories
 
 face_imagenames = [

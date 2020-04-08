@@ -437,24 +437,30 @@ def main(config):
     if config.corr:
         find_corr(config)
 
-    if config.categorise:
+    elif config.categorise:
         analyse_categorised_RDMs(config)
         avg_human_rdms(config)
-    if config.models:
+    elif config.models:
+        config.pretrained = True
+        config.categorise = True
         GenerateFeatures(config).run()
         CreateRDMs(config).run()
         organise(config)
         compare(config)
-
-    if config.box_plot:
-        BoxPlotting().run(config)
-    if config.hierarchical_clustering:
+    elif config.box_plot:
+        BoxPlotting(config).run()
+    elif config.hierarchical_clustering:
         HierarchicalClustering(config).run()
-    if config.animate_inanimate:
+    elif config.animate_inanimate:
         AnimateInanimate(config).run()
-
+    elif config.models_box_plot:
+        BoxPlotting(config).run_model()
     else:
+        print("Hiii")
         analyse_RDMs(config)
+
+    print("The End")
+    exit(1)
 
 
 if __name__ == "__main__":

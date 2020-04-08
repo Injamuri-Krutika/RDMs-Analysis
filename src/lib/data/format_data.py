@@ -1,7 +1,7 @@
 import os
 from lib.utils.manage_pickle_files import load_obj
 import numpy as np
-from lib.utils.new_categories import place_categoryids, face_imagenames, homonoid_monkey_imagenames
+from lib.utils.new_categories import place_categoryids, face_imagenames, homonoid_monkey_imagenames, object_categoryids
 
 
 class FormatData:
@@ -79,15 +79,17 @@ class FormatData:
         return final_data
 
     def get_required_labels(self,  data, label_type="category_ids"):
-        last_ind = 0
+        place_last_ind, face_last_ind = 0, 0
         for subj in data.keys():
             if self.config.box_plot:
                 ind1 = np.where(data[subj][label_type] == np.array(
                     place_categoryids).reshape(-1, 1))[1]
                 ind2 = np.where(data[subj]["image_names"] == np.array(
                     face_imagenames+homonoid_monkey_imagenames).reshape(-1, 1))[1]
-                ind = np.append(ind1, ind2)
-                last_ind = ind1.shape[0]
+                ind3 = np.where(data[subj][label_type] == np.array(
+                    object_categoryids).reshape(-1, 1))[1]
+                ind = np.concatenate((ind1, ind2, ind3))
+                place_last_ind, face_last_ind = ind1.shape[0], ind1.shape[0]+ind2.shape[0]
             elif type(self.config.category_ids) is list:
                 y = np.where(data[subj][label_type] ==
                              np.array(list(map(str, self.config.category_ids))).reshape(-1, 1))
@@ -110,4 +112,5 @@ class FormatData:
                         data[subj]["roi_data"][roi][stat] = data[subj]["roi_data"][roi][stat][ind]
 
         if self.config.box_plot:
-            data["place_lastind"] = last_ind
+            data["place_lastind"] = place_last_ind
+            data["face_lastind"] = face_last_ind

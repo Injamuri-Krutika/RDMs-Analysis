@@ -51,6 +51,9 @@ class Config(object):
         # Below arguments are used for algonauts integration
         self.parser.add_argument('--models', help='Use Alexnet, VGG 16, VGG 19, Inception pretrained models',
                                  action="store_true")
+        self.parser.add_argument('--models_box_plot', help='Uses pretrained Alexnet model to create and analyses mean of each of the layers',
+                                 action="store_true")
+
         self.parser.add_argument('--gpus', default='0',
                                  help='-1 for CPU, use comma for multiple gpus')
 
@@ -81,9 +84,8 @@ class Config(object):
         else:
             opt = self.parser.parse_args(args)
 
-        if opt.models:
-            opt.pretrained = True
-            opt.categorise = True
+        if opt.models or opt.models_box_plot:
+
             opt.feat_dir = os.path.join(
                 opt.result_dir, "categorised", opt.exp_id)
             opt.rdms_dir = os.path.join(
@@ -97,6 +99,10 @@ class Config(object):
 
             os.environ['CUDA_VISIBLE_DEVICES'] = opt.gpus_str
             opt.device = torch.device('cuda' if opt.gpus[0] >= 0 else 'cpu')
+
+        if opt.models_box_plot:
+            opt.archs = ['alexnet', 'vgg16', 'vgg19', 'inception']
+            # opt.archs = ['alexnet']
 
         opt.final_data_dir = os.path.join(opt.data_dir, "final_data")
         opt.num_of_subjs = 5

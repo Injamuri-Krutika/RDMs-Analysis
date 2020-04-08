@@ -64,18 +64,13 @@ def plot_corr(data, path, layer_id, stat=None):
     plt.close()
 
 
-def box_plot(place_data, face_data, x_labels, path):
-    fig, axs = plt.subplots(2, 1, figsize=(15, 15))
-    axs[0].boxplot(place_data)
-    axs[0].set_title('Place Related Images')
-    axs[0].set_xticklabels(x_labels)
+def box_plot(data, titles, x_labels, path):
+    fig, axs = plt.subplots(len(data), 1, figsize=(15, 15))
 
-    axs[1].boxplot(face_data)
-    axs[1].set_title('Face Related Images')
-    axs[1].set_xticklabels(x_labels)
-
-    # ax2.set_xticks(np.arange(len(x_labels)))
-    # ax2.set_xticklabels(x_labels)
-
+    for i, data_type in enumerate(data):
+        axs[i].boxplot(data_type)
+        axs[i].set_title(titles[i])
+        axs[i].set_xticklabels(x_labels)
+        axs[i].set_ylim(bottom=-0.5, top=0.5)
     plt.savefig(path+".png")
     plt.close()
