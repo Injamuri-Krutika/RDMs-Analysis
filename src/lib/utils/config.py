@@ -48,6 +48,10 @@ class Config(object):
                                  help="It will create RDMs and analyse only for 2, 3, 12, 13, 22, 23, 30, 31, 143, 145, 146, 148, 149, 47, 140, 70, 40, 78, 79, 84, 85, 122, 65, 112, 58, 87, 113, 127 categories"
                                  )
 
+        self.parser.add_argument('--dot_product_analysis', action="store_true",
+                                 help="It plots mean of pair-wise dot product of the image features and image voxels for DNN and humans respectively."
+                                 )
+
         # Below arguments are used for algonauts integration
         self.parser.add_argument('--models', help='Use Alexnet, VGG 16, VGG 19, Inception pretrained models',
                                  action="store_true")
@@ -84,7 +88,7 @@ class Config(object):
         else:
             opt = self.parser.parse_args(args)
 
-        if opt.models or opt.models_box_plot:
+        if opt.models or opt.models_box_plot or opt.dot_product_analysis:
 
             opt.feat_dir = os.path.join(
                 opt.result_dir, "categorised", opt.exp_id)
@@ -94,15 +98,12 @@ class Config(object):
             opt.gpus = [int(gpu) for gpu in opt.gpus.split(',')]
             opt.gpus = [i for i in range(
                 len(opt.gpus))] if opt.gpus[0] >= 0 else [-1]
-            opt.archs = ['vgg16', 'vgg19', 'inception']
+            opt.archs = ['alexnet', 'inception',
+                         'vgg16', 'vgg19']
             # opt.archs = ['alexnet']
 
             os.environ['CUDA_VISIBLE_DEVICES'] = opt.gpus_str
             opt.device = torch.device('cuda' if opt.gpus[0] >= 0 else 'cpu')
-
-        if opt.models_box_plot:
-            opt.archs = ['alexnet', 'vgg16', 'vgg19', 'inception']
-            # opt.archs = ['alexnet']
 
         opt.final_data_dir = os.path.join(opt.data_dir, "final_data")
         opt.num_of_subjs = 5

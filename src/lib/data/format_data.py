@@ -1,7 +1,7 @@
 import os
 from lib.utils.manage_pickle_files import load_obj
 import numpy as np
-from lib.utils.new_categories import place_categoryids, face_imagenames, homonoid_monkey_imagenames, object_categoryids
+from lib.utils.new_categories import place_categoryids, face_imagenames, homonoid_monkey_imagenames, object_categoryids, animate_inanimate
 
 
 class FormatData:
@@ -73,7 +73,7 @@ class FormatData:
                                                                ["category_name"] for sti in final_data[subj]["stimulus_ids"]])
                 final_data[subj]["roi_data"] = data["roi_data"]
 
-        if self.config.subset_data or self.config.box_plot:
+        if self.config.subset_data or self.config.box_plot or self.config.dot_product_analysis:
             self.get_required_labels(final_data)
 
         return final_data
@@ -90,6 +90,26 @@ class FormatData:
                     object_categoryids).reshape(-1, 1))[1]
                 ind = np.concatenate((ind1, ind2, ind3))
                 place_last_ind, face_last_ind = ind1.shape[0], ind1.shape[0]+ind2.shape[0]
+            if self.config.dot_product_analysis:
+                ind1 = np.where(
+                    data[subj]["category_ids"] == np.array(place_categoryids).reshape(-1, 1))[1]
+                ind2 = np.where(data[subj]["image_names"] == np.array(
+                    face_imagenames+homonoid_monkey_imagenames).reshape(-1, 1))[1]
+                ind3 = np.where(
+                    data[subj]["category_ids"] == np.array(
+                        animate_inanimate["plants"]).reshape(-1, 1))[1]
+                ind4 = np.where(
+                    data[subj]["category_ids"] == np.array(
+                        animate_inanimate["animals"]).reshape(-1, 1))[1]
+                ind5 = np.where(
+                    data[subj]["category_ids"] == np.array(
+                        animate_inanimate["inanimate"]).reshape(-1, 1))[1]
+                ind = np.concatenate((ind1, ind2, ind3, ind4, ind5))
+                place_last_ind = ind1.shape[0]
+                face_last_ind = place_last_ind+ind2.shape[0]
+                plants_last_ind = face_last_ind + ind3.shape[0]
+                animals_last_ind = plants_last_ind + ind4.shape[0]
+
             elif type(self.config.category_ids) is list:
                 y = np.where(data[subj][label_type] ==
                              np.array(list(map(str, self.config.category_ids))).reshape(-1, 1))
@@ -114,3 +134,9 @@ class FormatData:
         if self.config.box_plot:
             data["place_lastind"] = place_last_ind
             data["face_lastind"] = face_last_ind
+
+        if self.config.dot_product_analysis:
+            data["place_lastind"] = place_last_ind
+            data["face_lastind"] = face_last_ind
+            data["plant_lastind"] = plants_last_ind
+            data["animal_lastind"] = animals_last_ind

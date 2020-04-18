@@ -10,6 +10,7 @@ from algonauts.src.lib.feature_extract.create_RDMs import CreateRDMs
 from lib.analysis_for_boxplot import BoxPlotting
 from lib.hierarchical_clustering import HierarchicalClustering
 from lib.animate_inanimate import AnimateInanimate
+from lib.dot_product_analysis import DotProductAnalysis
 from tqdm import tqdm
 import numpy as np
 import sys
@@ -455,6 +456,10 @@ def main(config):
         AnimateInanimate(config).run()
     elif config.models_box_plot:
         BoxPlotting(config).run_model()
+    elif config.dot_product_analysis:
+        DotProductAnalysis(config).run_model()
+        DotProductAnalysis(config).run_human()
+
     else:
         print("Hiii")
         analyse_RDMs(config)
